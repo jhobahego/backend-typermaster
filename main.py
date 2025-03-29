@@ -11,13 +11,7 @@ from typing import List
 from pydantic import BaseModel
 
 # Load environment variables
-env = os.getenv("ENV", "development")
-env_file = f".env.{env}"
-
-if not os.path.exists(env_file):
-    raise RuntimeError(f"Configuration file {env_file} not found")
-
-load_dotenv(env_file)
+load_dotenv()
 
 # Validate required environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
