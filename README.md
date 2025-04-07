@@ -20,6 +20,7 @@ Backend API para la aplicación TyperMaster, un juego de mecanografía que ayuda
 - Python 3.8 o superior
 - PostgreSQL
 - pip (gestor de paquetes de Python)
+- Google Gemini API Key (for text generation)
 
 ## ⚙️ Configuración
 
@@ -40,10 +41,13 @@ venv\Scripts\activate # Windows
 pip install -r requirements.txt
 ```
 
-4. Configura las variables de entorno
-```bash
+4. Configura las variables de entorno. Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
+```dotenv
 # Database
 DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/typermaster
+
+# Gemini API Key (Required for text generation)
+GEMINI_API_KEY=TU_CLAVE_API_DE_GEMINI
 
 # CORS Origins
 DEV_ORIGINS=http://localhost:5173,http://localhost:3000
@@ -51,6 +55,8 @@ PROD_ORIGINS=https://tudominio.com
 
 # Environment
 ENVIRONMENT=development
+```
+Asegúrate de reemplazar `TU_CLAVE_API_DE_GEMINI` con tu clave real.
 
 5. Crea la base de datos en PostgreSQL
 ```sql

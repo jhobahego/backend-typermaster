@@ -4,11 +4,12 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
-import random
-import os
-from dotenv import load_dotenv
-from typing import List
 from pydantic import BaseModel
+import google.generativeai as genai
+
+import os
+
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -17,6 +18,14 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") # Get Gemini API Key
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is not set")
+
+# Configure Gemini API
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel('gemini-2.5-pro-exp-03-25')
 
 app = FastAPI()
 
@@ -106,22 +115,31 @@ def get_db():
     finally:
         db.close()
 
-# Sample texts
-TEXTS = [
-    "The quick brown fox jumps over the lazy dog.",
-    "To be or not to be, that is the question.",
-    "All that glitters is not gold.",
-    "A journey of a thousand miles begins with a single step.",
-    "In three words I can sum up everything I've learned about life: it goes on.",
-    "Life is what happens when you're busy making other plans.",
-    "The only way to do great work is to love what you do.",
-    "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-]
-
 # Routes
 @app.get("/texts")
 async def get_random_text():
-    return {"text": random.choice(TEXTS)}
+    try:
+        # Updated prompt to explicitly ask for only the text
+        prompt = "Generate a short English text suitable for a typing test. It should be a single paragraph, between 1 and 4 lines long. IMPORTANT: Respond ONLY with the generated text itself, without any introduction, explanation, or formatting."
+        response = model.generate_content(prompt)
+        # Basic error handling/check if response has text
+        if response.text:
+            # Clean up potential markdown or extra whitespace
+            generated_text = response.text.strip()
+            # Further cleaning might be needed depending on model behavior
+            # Remove potential quotes if the model wraps the text
+            if generated_text.startswith('"') and generated_text.endswith('"'):
+                generated_text = generated_text[1:-1]
+            return {"text": generated_text}
+        else:
+            # Fallback or raise error if generation fails
+            # For now, returning a default text as fallback
+            return {"text": "The quick brown fox jumps over the lazy dog."}
+    except Exception as e:
+        print(f"Error generating text with Gemini: {e}")
+        # Fallback in case of API error
+        return {"text": "Error generating text. Please try again later."}
+
 
 @app.post("/results", response_model=GameResultResponse)
 async def save_result(result: GameResultCreate, db: Session = Depends(get_db)):
