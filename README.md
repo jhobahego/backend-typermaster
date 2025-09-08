@@ -46,8 +46,9 @@ pip install -r requirements.txt
 # Database
 DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/typermaster
 
-# Gemini API Key (Required for text generation)
+# Gemini API Key (Required for text generation) and Gemini model
 GEMINI_API_KEY=TU_CLAVE_API_DE_GEMINI
+GEMINI_MODEL=model-for-text-generation
 
 # CORS Origins
 DEV_ORIGINS=http://localhost:5173,http://localhost:3000
