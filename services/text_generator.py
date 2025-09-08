@@ -36,7 +36,7 @@ async def generate_typing_text() -> str:
     try:
         prompt = prompt_short_text
         response = client.models.generate_content(
-            model="gemini-2.5-flash-lite", contents=prompt
+            model=settings.gemini_model, contents=prompt
         )
 
         logger.info(f"Gemini API responded with: {response.text}")

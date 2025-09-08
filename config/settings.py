@@ -1,9 +1,9 @@
-from pydantic import Field, AnyHttpUrl
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List
 import os
+from typing import List
 
 from dotenv import load_dotenv
+from pydantic import AnyHttpUrl, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
 
@@ -12,6 +12,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 DEV_ORIGINS = os.getenv("DEV_ORIGINS", "http://localhost:5173")
 PROD_ORIGINS = os.getenv("PROD_ORIGINS", "")
 ENVIRONMENT = os.getenv("ENVIRONMENT")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL is not set in the environment variables.")
@@ -21,6 +22,8 @@ if not ENVIRONMENT:
     raise ValueError("ENVIRONMENT is not set in the environment variables.")
 if ENVIRONMENT not in ["development", "production"]:
     raise ValueError("ENVIRONMENT must be either 'development' or 'production'.")
+if not GEMINI_MODEL:
+    raise ValueError("GEMINI_MODEL is not set in the environment variables.")
 
 
 class Settings(BaseSettings):
@@ -29,6 +32,7 @@ class Settings(BaseSettings):
     environment: str = Field("development", validation_alias="ENVIRONMENT")
     dev_origins_str: str = Field("http://localhost:5173", validation_alias="DEV_ORIGINS")
     prod_origins_str: str = Field("", validation_alias="PROD_ORIGINS")
+    gemini_model: str = Field("gemini-2.0-flash-lite-001", validation_alias="GEMINI_MODEL")
 
     # Configure BaseSettings to look for a .env file
     model_config = SettingsConfigDict(
@@ -62,7 +66,8 @@ class Settings(BaseSettings):
 
 settings = Settings(
     database_url=DATABASE_URL, 
-    gemini_api_key=GEMINI_API_KEY, 
+    gemini_api_key=GEMINI_API_KEY,
+    gemini_model=GEMINI_MODEL, 
     environment=ENVIRONMENT, 
     dev_origins_str=DEV_ORIGINS, 
     prod_origins_str=PROD_ORIGINS
